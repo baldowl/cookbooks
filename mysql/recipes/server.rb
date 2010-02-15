@@ -75,8 +75,20 @@ rescue
   end
 end
 
+case node[:platform]
+when "debian","ubuntu"
+  template '/etc/mysql/debian.cnf' do
+    cookbook 'mysql'
+    source 'debian.cnf.erb'
+    owner 'root'
+    group 'root'
+    mode '0600'
+    action :create
+  end
+end
+
 execute "mysql-install-privileges" do
   command "/usr/bin/mysql -u root -p#{node[:mysql][:server_root_password]} < /etc/mysql/grants.sql"
   action :nothing
-  subscribes :run, resources(:template => "/etc/mysql/grants.sql")
+  subscribes :run, resources(:template => "/etc/mysql/grants.sql"), :immediately
 end
